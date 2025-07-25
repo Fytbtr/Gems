@@ -2,24 +2,147 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>3 Bosqichli Tosh O‘yini</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Onlayn Pul Ishlash</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <h1>🎯 3 Bosqichli Tosh O‘yini</h1>
-    <p><strong>Bosqich:</strong> <span id="round">1</span></p>
-    <p><strong>Navbat:</strong> <span id="currentPlayer">1</span>-o‘yinchi</p>
-    <button id="rollDice">🎲 Kubik tashla</button>
-    <p>Tushgan son: <span id="diceResult">-</span></p>
+<body class="bg-gradient-to-b from-blue-100 to-white min-h-screen font-sans flex items-center justify-center px-4">
 
-    <div id="players"></div>
+  <div id="app" class="max-w-md w-full bg-white p-6 rounded-2xl shadow-lg">
 
-    <p id="winner" class="winner"></p>
-    <button id="restartBtn" style="display:none;">🔁 Qayta boshlash</button>
+    <!-- 1️⃣ Nickname oynasi -->
+    <div id="nicknameScreen">
+      <h1 class="text-2xl font-bold mb-4 text-center">Ismingizni kiriting</h1>
+      <input id="nickname" type="text" placeholder="Masalan: Aziz" class="w-full border p-3 rounded-lg mb-4" />
+      <button onclick="startQuiz()" class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600">Boshlash</button>
+    </div>
+
+    <!-- 2️⃣ Savollar -->
+    <div id="quizScreen" class="hidden">
+      <h2 id="questionText" class="text-lg font-semibold mb-4"></h2>
+      <div id="options" class="space-y-2 mb-4"></div>
+      <button onclick="nextQuestion()" class="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600">Keyingi</button>
+    </div>
+
+    <!-- 3️⃣ Natija -->
+    <div id="resultScreen" class="hidden text-center">
+      <h2 class="text-2xl font-bold mb-4">✅ Natija</h2>
+      <p id="resultText" class="text-lg"></p>
+      <button onclick="location.reload()" class="mt-6 bg-blue-500 text-white px-4 py-2 rounded-lg">Qaytadan boshlash</button>
+    </div>
+
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    const quizData = [
+      {
+        question: "HTML nima uchun ishlatiladi?",
+        options: ["Ma'lumot saqlash", "Veb sahifalarni yaratish", "Video tahrirlash"],
+        correct: 1
+      },
+      {
+        question: "CSS nima qiladi?",
+        options: ["Fayllarni zaxiralaydi", "Dizayn va uslub beradi", "Server bilan bog‘lanadi"],
+        correct: 1
+      },
+      {
+        question: "JavaScript nima?",
+        options: ["Interaktivlik uchun", "Rasmlarni chizish", "Matn yozish uchun"],
+        correct: 0
+      },
+      {
+        question: "HTTP bu...",
+        options: ["Tarmoq protokoli", "Ma'lumotlar bazasi", "Brauzer"],
+        correct: 0
+      },
+      {
+        question: "Frontend qismi nima?",
+        options: ["Foydalanuvchi ko‘radi", "Server qismi", "Ma'lumotlar bazasi"],
+        correct: 0
+      },
+      {
+        question: "Git nima qiladi?",
+        options: ["Kod versiyasini boshqaradi", "Fayllarni tahrirlaydi", "Serverni ishga tushiradi"],
+        correct: 0
+      },
+      {
+        question: "Web-server misoli?",
+        options: ["Apache", "Photoshop", "Word"],
+        correct: 0
+      },
+      {
+        question: "HTMLda sarlavha tegi?",
+        options: ["<title>", "<h1>", "<p>"],
+        correct: 1
+      },
+      {
+        question: "CSS fayl qanday ulanadi?",
+        options: ["<style src='style.css'>", "<link rel='stylesheet' href='style.css'>", "<css>style.css</css>"],
+        correct: 1
+      },
+      {
+        question: "JS funksiyasi qanday yoziladi?",
+        options: ["function myFunc()", "func = myFunc()", "define function myFunc()"],
+        correct: 0
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let nickname = "";
+
+    function startQuiz() {
+      nickname = document.getElementById("nickname").value.trim();
+      if (!nickname) {
+        alert("Iltimos, ismingizni kiriting!");
+        return;
+      }
+
+      document.getElementById("nicknameScreen").classList.add("hidden");
+      document.getElementById("quizScreen").classList.remove("hidden");
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const question = quizData[currentQuestion];
+      document.getElementById("questionText").innerText = question.question;
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+
+      question.options.forEach((option, index) => {
+        const btn = document.createElement("button");
+        btn.className = "w-full border p-2 rounded-lg hover:bg-gray-100";
+        btn.innerText = option;
+        btn.onclick = () => selectAnswer(index);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(index) {
+      const correctIndex = quizData[currentQuestion].correct;
+      if (index === correctIndex) {
+        score++;
+      }
+      document.querySelectorAll("#options button").forEach((btn, i) => {
+        btn.disabled = true;
+        btn.classList.add(i === correctIndex ? "bg-green-200" : "bg-red-100");
+      });
+    }
+
+    function nextQuestion() {
+      if (currentQuestion < quizData.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById("quizScreen").classList.add("hidden");
+      document.getElementById("resultScreen").classList.remove("hidden");
+      document.getElementById("resultText").innerText = `${nickname}, siz ${quizData.length} ta savoldan ${score} tasiga to‘g‘ri javob berdingiz!`;
+    }
+  </script>
 </body>
 </html>
